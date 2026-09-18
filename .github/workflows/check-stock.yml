@@ -1,0 +1,32 @@
+# Save this file as: .github/workflows/check-stock.yml  in your repo
+#
+# GitHub runs this on their own servers on the schedule below - your
+# computer does not need to be on at all.
+
+name: Check LEGO 76417 stock
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"   # every 5 minutes (GitHub may delay slightly under load)
+  workflow_dispatch:         # lets you also trigger it manually from the Actions tab
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install requests beautifulsoup4
+
+      - run: python lego_76417_stock_checker.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+          USE_TWILIO: "false"
+          TWILIO_ACCOUNT_SID: ${{ secrets.TWILIO_ACCOUNT_SID }}
+          TWILIO_AUTH_TOKEN: ${{ secrets.TWILIO_AUTH_TOKEN }}
+          TWILIO_FROM_NUMBER: ${{ secrets.TWILIO_FROM_NUMBER }}
+          TWILIO_TO_NUMBER: ${{ secrets.TWILIO_TO_NUMBER }}
